@@ -3,6 +3,7 @@ import itchat
 import sys
 import requests
 import json
+import TuringAPIDataProcess
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -21,11 +22,14 @@ def getMessageFromTuring(msg):
     }
     rawData = json.dumps(inputData)
     r = requests.post(turingApiUrl,rawData)
-    return r.json()["text"]
+    return r.json()
+
+def processTuringJsonData(data):
+    return TuringAPIDataProcess.codeMap[data['code']](data)
+
 
 @itchat.msg_register(itchat.content.TEXT)
 def text_reply(msg):
-    print msg
     text = msg['Text']
     FromUserName = msg['FromUserName']
     if itchat.wechatTable.has_key(FromUserName):
@@ -33,18 +37,20 @@ def text_reply(msg):
             itchat.wechatTable[FromUserName]['isTurningOn'] = False
             return
 
-        if (text == itchat.openTurning):
+        if text == itchat.openTurning:
             itchat.wechatTable[FromUserName]['isTurningOn'] = True
             return "欢迎光临~接下来的时间由我来回答你的问题哦~~~ 如果不想和我聊天就输入‘芝麻关门’~~~~我就会走哦~~"
 
 
         if itchat.wechatTable[FromUserName]['isTurningOn'] == True:
-            return getMessageFromTuring(msg['Text'])
+            resultJson = getMessageFromTuring(msg['Text'])
+            text = processTuringJsonData(data=resultJson)
+            return text
 
     else:
         itchat.wechatTable[FromUserName] = { 'isTurningOn': False }
-        text_reply(msg)
-        return
+        return text_reply(msg)
+
 
 
 
@@ -52,8 +58,7 @@ def text_reply(msg):
 def main():
     itchat.auto_login()
     itchat.run()
-     #msg = raw_input()
-     #getMessageFromTuring(msg)
+
 
 if __name__ == '__main__':
     main()
