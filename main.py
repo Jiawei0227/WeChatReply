@@ -15,7 +15,7 @@ itchat.closeTurning = u'芝麻关门'
 
 def getMessageFromTuring(msg):
     inputData = {
-        'key': 'eae8cb9baae94693b49b6cad3ce88a1d',
+        'key': '...', #Your own code
         'loc': '北京市中关村',
         'userid': '116985',
         'info': msg
